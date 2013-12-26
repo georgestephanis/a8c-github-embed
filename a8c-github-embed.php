@@ -4,6 +4,7 @@ Plugin Name: A8c GitHub Embed
 Plugin URI: http://github.com/georgestephanis/a8c-github-embed
 Description: Pulls in details of issues, pull requests, commits, and gists from GitHub to embed.
 Author: George Stephanis
+Contributors: miyauchi
 Version: 0.1
 Author URI: http://stephanis.info
 */
@@ -49,6 +50,7 @@ class A8c_GitHub_Embed {
 
 	/**
 	 * Converts an inline URL into the [gist] shortcode.
+	 * Adapted from http://wordpress.org/plugins/oembed-gist/ props @miyauchi
 	 */
 	function gist_handler( $matches ) {
 		$id   = sanitize_key( $matches[2] );
@@ -82,6 +84,7 @@ class A8c_GitHub_Embed {
 
 	/**
 	 * Process the [gist] shortcode.
+	 * Adapted from http://wordpress.org/plugins/oembed-gist/ props @miyauchi
 	 */
 	function gist_shortcode( $params ) {
 		$defaults = array(
