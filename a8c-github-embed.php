@@ -1,4 +1,12 @@
 <?php
+/*
+Plugin Name: A8c GitHub Embed
+Plugin URI: http://github.com/georgestephanis/a8c-github-embed
+Description: Pulls in details of issues, pull requests, commits, and gists from GitHub to embed.
+Author: George Stephanis
+Version: 0.1
+Author URI: http://stephanis.info
+*/
 
 class A8c_GitHub_Embed {
 
