@@ -36,6 +36,9 @@ class A8c_GitHub_Embed {
 		add_shortcode( 'gist',          array( $this, 'gist_shortcode' ) );
 		add_shortcode( 'github_commit', array( $this, 'github_commit_shortcode' ) );
 		add_shortcode( 'github_issue',  array( $this, 'github_issue_shortcode' ) );
+
+		add_filter( 'the_content',  array( $this, 'inline_github_clickable' ) );
+		add_filter( 'comment_text', array( $this, 'inline_github_clickable' ) );
 	}
 
 	/**
@@ -185,5 +188,72 @@ class A8c_GitHub_Embed {
 		wp_enqueue_style( 'a8c-github-embed' );
 		return $return;
 	}
+
+	/**
+	 * Make inline urls to GitHub clickable, and shorten them to be more intelligible.
+	 *
+	 * Potentially add hovercards later with JS.
+	 */
+	function inline_github_clickable( $content ) {
+		// Handle issues and pulls.
+		if ( preg_match_all( "~{$this->github_issue_regex}~i", $content, $matches, PREG_SET_ORDER ) ) {
+			$find = array();
+			$replace = array();
+			foreach( $matches as $key => $match ) {
+				$find[ $key ] = $match[0];
+				$account      = sanitize_key( $match[1] );
+				$repository   = sanitize_key( $match[2] );
+				$type         = sanitize_key( $match[3] ); // (issue|pull)
+				$issue        = intval( $match[4] );
+				$link         = sprintf( 'https://github.com/%s/%s/%s/%s', $account, $repository, $type, $issue );
+				$text         = sprintf( '<code>#%s-%s</code>', $issue, $repository );
+				$title        = sprintf( '%3$s %4$s on %1$s/%2$s', $account, $repository, ucfirst( rtrim( $type, 's' ) ), (int) $issue );
+				$extra_atts   = sprintf( 'data-account="%s" data-repository="%s" data-type="%s" data-issue="%s"',
+											esc_attr( $account ),
+											esc_attr( $repository ),
+											esc_attr( $type ),
+											intval( $issue )
+										);
+		
+				$replace[ $key ] = sprintf( '<a href="%1$s" class="inline-github-commit" title="%3$s" %4$s>%2$s</a>',
+												esc_url( $link ),
+												$text,
+												esc_attr( $title ),
+												$extra_atts
+											);
+			}
+			$content = str_replace( $find, $replace, $content );
+		}
+
+		// Handle commits.
+		if ( preg_match_all( "~{$this->github_commit_regex}~i", $content, $matches, PREG_SET_ORDER ) ) {
+			$find = array();
+			$replace = array();
+			foreach( $matches as $key => $match ) {
+				$find[ $key ] = $match[0];
+				$account      = sanitize_key( $match[1] );
+				$repository   = sanitize_key( $match[2] );
+				$commit       = sanitize_key( $match[3] );
+				$link         = sprintf( 'https://github.com/%s/%s/commit/%s', $account, $repository, $commit );
+				$text         = sprintf( '<code>%s</code>', esc_html( substr( $commit, 0, 10 ) ) );
+				$title        = sprintf( 'Commit %3$s on %1$s/%2$s', $account, $repository, $commit );
+				$extra_atts   = sprintf( 'data-account="%s" data-repository="%s" data-commit="%s"',
+											esc_attr( $account ),
+											esc_attr( $repository ),
+											esc_attr( $commit )
+										);
+
+				$replace[ $key ] = sprintf( '<a href="%1$s" class="inline-github-commit" title="%3$s" %4$s>%2$s</a>',
+												esc_url( $link ),
+												$text,
+												esc_attr( $title ),
+												$extra_atts
+											);
+			}
+			$content = str_replace( $find, $replace, $content );
+		}
+		return $content;
+	}
+
 }
 new A8c_GitHub_Embed;
