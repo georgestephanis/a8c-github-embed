@@ -11,6 +11,11 @@ Author URI: http://stephanis.info
 
 class A8c_GitHub_Embed {
 
+	// Embed Handlers for pasting URLs in directly.
+	var $gist_regex          = 'https://gist.github.com/([^\/]+\/)?([a-zA-Z0-9]+)(\#file(\-|_)(\S+))?';
+	var $github_commit_regex = 'https://github.com/([^\/]+)/([^\/]+)/commit/([a-f\d]{40})/?(\S*)';
+	var $github_issue_regex  = 'https://github.com/([^\/]+)/([^\/]+)/(issues|pull)/([\d]+)/?(\S*)';
+
 	/**
 	 * Just enqueue things for later.
 	 */
@@ -23,13 +28,9 @@ class A8c_GitHub_Embed {
 	 * Kick off the embeds and shortcodes.
 	 */
 	function plugins_loaded() {
-		// Embed Handlers for pasting URLs in directly.
-		$gist_regex          = '~https://gist.github.com/([^\/]+\/)?([a-zA-Z0-9]+)(\#file(\-|_)(.+))?$~i';
-		$github_commit_regex = '~https://github.com/([^\/]+)/([^\/]+)/commit/([a-f\d]{40})/?(.*)$~i';
-		$github_issue_regex  = '~https://github.com/([^\/]+)/([^\/]+)/(issues|pull)/([\d]+)/?(.*)$~i';;
-		wp_embed_register_handler( 'gist',          $gist_regex,          array( $this, 'gist_handler' ) );
-		wp_embed_register_handler( 'github_commit', $github_commit_regex, array( $this, 'github_commit_handler' ) );
-		wp_embed_register_handler( 'github_issue',  $github_issue_regex,  array( $this, 'github_issue_handler' ) );
+		wp_embed_register_handler( 'gist',          "~{$this->gist_regex}~i",          array( $this, 'gist_handler' ) );
+		wp_embed_register_handler( 'github_commit', "~{$this->github_commit_regex}~i", array( $this, 'github_commit_handler' ) );
+		wp_embed_register_handler( 'github_issue',  "~{$this->github_issue_regex}~i",  array( $this, 'github_issue_handler' ) );
 
 		// And the shortcodes that really do the work.
 		add_shortcode( 'gist',          array( $this, 'gist_shortcode' ) );
